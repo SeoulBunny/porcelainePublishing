@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local dev PDF storage (R2/S3 stand-in)
+.uploads/
+
+# local Claude config / vendored skills
+.claude/

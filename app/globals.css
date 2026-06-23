@@ -1,26 +1,127 @@
 @import "tailwindcss";
 
+/* ── Porcelaine design tokens (Tailwind v4 CSS-first @theme) ───────────── */
+@theme {
+  --color-porcelain: #fbfaf8; /* warm near-white page field */
+  --color-surface: #ffffff; /* cards */
+  --color-ink: #1a1a1a; /* headings / primary text */
+  --color-body: #2e2b28; /* body copy */
+  --color-muted: #6b6660; /* meta, captions */
+  --color-hairline: #e6e2dc; /* 1px rules / borders */
+  --color-accent: #1a1a1a; /* restrained ink emphasis */
+
+  --font-serif: var(--font-cormorant), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-porcelain: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 200ms;
+  --dur: 400ms;
+  --dur-slow: 600ms;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: var(--color-porcelain);
+  --foreground: var(--color-body);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-porcelain);
+  color: var(--color-body);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--color-ink);
+  color: var(--color-porcelain);
+}
+
+/* Eyebrow / meta label */
+.eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--color-muted);
+}
+
+/* Animated underline for inline links */
+.link-underline {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size var(--dur) var(--ease-porcelain);
+}
+.link-underline:hover,
+.link-underline:focus-visible {
+  background-size: 100% 1px;
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity var(--dur-slow) var(--ease-porcelain),
+    transform var(--dur-slow) var(--ease-porcelain);
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Article prose */
+.prose-porcelain {
+  max-width: 66ch;
+  font-size: 1.0625rem;
+  line-height: 1.85;
+  color: var(--color-body);
+}
+.prose-porcelain p {
+  margin-bottom: 1.4em;
+}
+.prose-porcelain h2 {
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  color: var(--color-ink);
+  margin: 2em 0 0.6em;
+  line-height: 1.2;
+}
+.prose-porcelain blockquote {
+  border-left: 1px solid var(--color-hairline);
+  padding-left: 1.25rem;
+  margin: 1.6em 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

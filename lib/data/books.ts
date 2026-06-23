@@ -1,0 +1,108 @@
+import type { Book } from "./types";
+
+export const books: Book[] = [
+  {
+    id: "b-1",
+    slug: "the-blue-and-white-world",
+    title: "The Blue-and-White World",
+    isbn: "978-89-000-0001-2",
+    topic: "Material Culture",
+    synopsis:
+      "A global history of porcelain told through a single palette, tracing cobalt from Persian mines to Jingdezhen kilns to the parlours of Europe.",
+    authorIds: ["p-han"],
+    publishedOn: "2026-05-12",
+    accessNote: "Print and digital editions. Access details to follow.",
+    tint: "#eef0f1",
+  },
+  {
+    id: "b-2",
+    slug: "an-ethics-of-looking",
+    title: "An Ethics of Looking",
+    isbn: "978-89-000-0002-9",
+    topic: "Philosophy",
+    synopsis:
+      "Collected essays on attention, care, and the moral life of the eye, gathered from a decade of work in the philosophy of art.",
+    authorIds: ["p-moreau"],
+    publishedOn: "2026-04-20",
+    accessNote: "Hardcover. Access details to follow.",
+    tint: "#f2eee9",
+  },
+  {
+    id: "b-3",
+    slug: "the-harbour-and-the-ledger",
+    title: "The Harbour and the Ledger",
+    isbn: "978-89-000-0003-6",
+    topic: "History",
+    synopsis:
+      "How accounting made the Atlantic economy thinkable. A history of trade told through the documents that recorded it.",
+    authorIds: ["p-okonkwo"],
+    publishedOn: "2026-03-30",
+    accessNote: "Print only at present. Access details to follow.",
+    tint: "#f3efe9",
+  },
+  {
+    id: "b-4",
+    slug: "what-the-ice-remembers",
+    title: "What the Ice Remembers",
+    isbn: "978-89-000-0004-3",
+    topic: "Earth Science",
+    synopsis:
+      "A reader's introduction to palaeoclimatology, written for the non-specialist, on how the planet keeps its records.",
+    authorIds: ["p-lindqvist"],
+    publishedOn: "2026-02-18",
+    accessNote: "Print and digital editions. Access details to follow.",
+    tint: "#edf0f0",
+  },
+  {
+    id: "b-5",
+    slug: "the-instrument-and-the-academy",
+    title: "The Instrument and the Academy",
+    isbn: "978-89-000-0005-0",
+    topic: "History of Science",
+    synopsis:
+      "A study of how new scientific instruments reorganised who was permitted to produce knowledge in early modern Europe.",
+    authorIds: ["p-rossi"],
+    publishedOn: "2026-01-25",
+    accessNote: "Hardcover. Access details to follow.",
+    tint: "#f1efea",
+  },
+  {
+    id: "b-6",
+    slug: "translating-the-self",
+    title: "Translating the Self",
+    isbn: "978-89-000-0006-7",
+    topic: "Literature",
+    synopsis:
+      "On bilingual writers and the productive impossibility of saying the same thing twice in two languages.",
+    authorIds: ["p-haddad"],
+    publishedOn: "2025-12-15",
+    accessNote: "Print and digital editions. Access details to follow.",
+    tint: "#f2eee9",
+  },
+  {
+    id: "b-7",
+    slug: "the-city-as-commons",
+    title: "The City as Commons",
+    isbn: "978-89-000-0007-4",
+    topic: "Environment",
+    synopsis:
+      "An argument for treating urban ecology as shared infrastructure, drawing on case studies from three continents.",
+    authorIds: ["p-nakamura"],
+    publishedOn: "2025-11-30",
+    accessNote: "Print only at present. Access details to follow.",
+    tint: "#eef0ec",
+  },
+  {
+    id: "b-8",
+    slug: "the-shape-of-numbers",
+    title: "The Shape of Numbers",
+    isbn: "978-89-000-0008-1",
+    topic: "Mathematics",
+    synopsis:
+      "An invitation to the geometry of numbers, from lattices to modular forms, for readers with a year of university mathematics.",
+    authorIds: ["p-kim"],
+    publishedOn: "2025-10-10",
+    accessNote: "Hardcover and digital. Access details to follow.",
+    tint: "#eff0ef",
+  },
+];

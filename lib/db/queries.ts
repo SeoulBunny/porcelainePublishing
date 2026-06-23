@@ -9,11 +9,14 @@ import {
   edition,
   article,
   articleAuthor,
+  book,
+  bookAuthor,
   person,
   submission,
   reviewComment,
 } from "@/db/schema";
 import { pickReviewJournal } from "@/lib/review-scope";
+import type { ArticleBlock } from "@/lib/data/types";
 
 // Data-access for the contributor/admin system, typed Drizzle queries (no string
 // SQL). Identity/accounts are owned by Better Auth; this module covers app role,
@@ -446,8 +449,12 @@ export async function attachSubmissionToEdition(submissionId: string, editionId:
   if (!sub) throw new Error("Submission not found");
   const articleId = `a-${randomUUID()}`;
   const slug = `${slugify(sub.title)}-${randomUUID().slice(0, 6)}`;
+  // Date the article to its issue, else today — never leave publishedOn null
+  // (renders as "Invalid Date" and sorts last in every recency query).
+  const [ed] = await db.select({ publishedOn: edition.publishedOn }).from(edition).where(eq(edition.id, editionId));
+  const publishedOn = ed?.publishedOn ?? new Date().toISOString().slice(0, 10);
   await db.insert(article).values({
-    id: articleId, editionId, slug, title: sub.title, abstract: sub.abstract,
+    id: articleId, editionId, slug, title: sub.title, abstract: sub.abstract, publishedOn,
   });
   // Authorship only if the submitting user is linked to a catalogue person.
   const [p] = await db.select({ id: person.id }).from(person).where(eq(person.userId, sub.authorUserId));
@@ -508,4 +515,244 @@ export async function isEditorOfJournal(userId: string, journalId: string): Prom
     .from(journalEditor)
     .where(and(eq(journalEditor.userId, userId), eq(journalEditor.journalId, journalId)));
   return rows.length > 0;
+}
+
+// ── Public catalogue reads ─────────────────────────────────────────────────
+// Page-ready shapes: derived fields (latestDate, authors, counts) are embedded so
+// pages loop zero queries. Filter facets are derived in-page from these lists.
+// Catalogue rows are seeded from lib/data (scripts/seed.ts); swapping to real data
+// later means inserting rows + deleting the seeded placeholders, no code change.
+
+export type JournalCard = {
+  id: string; slug: string; title: string;
+  topic: string | null; description: string | null; tint: string | null;
+  issn: string | null; foundedYear: number | null;
+  latestDate: string | null; authors: string[];
+};
+export type BookCard = {
+  id: string; slug: string; title: string;
+  topic: string | null; synopsis: string | null; tint: string | null;
+  isbn: string | null; publishedOn: string | null; accessNote: string | null;
+  authors: string[];
+};
+
+// Journals, recent-first by latest edition date, each with its article-author names.
+export async function journalsByRecency(): Promise<JournalCard[]> {
+  const journals = await db
+    .select({
+      id: journal.id, slug: journal.slug, title: journal.title,
+      topic: journal.topic, description: journal.description, tint: journal.tint,
+      issn: journal.issn, foundedYear: journal.foundedYear,
+    })
+    .from(journal);
+
+  const dates = await db
+    .select({ jid: edition.journalId, latest: sql<string | null>`max(${edition.publishedOn})` })
+    .from(edition)
+    .groupBy(edition.journalId);
+  const latestById = new Map(dates.map((d) => [d.jid, d.latest]));
+
+  const authorRows = await db
+    .select({ jid: edition.journalId, name: person.name })
+    .from(edition)
+    .innerJoin(article, eq(article.editionId, edition.id))
+    .innerJoin(articleAuthor, eq(articleAuthor.articleId, article.id))
+    .innerJoin(person, eq(person.id, articleAuthor.personId));
+  const authorsById = new Map<string, Set<string>>();
+  for (const r of authorRows) {
+    (authorsById.get(r.jid) ?? authorsById.set(r.jid, new Set()).get(r.jid)!).add(r.name);
+  }
+
+  return journals
+    .map((j) => ({
+      ...j,
+      latestDate: latestById.get(j.id) ?? null,
+      authors: [...(authorsById.get(j.id) ?? [])].sort(),
+    }))
+    .sort((a, b) => (b.latestDate ?? "").localeCompare(a.latestDate ?? ""));
+}
+
+export async function getJournalBySlug(slug: string): Promise<JournalCard | null> {
+  // ponytail: 11 journals — filter the recency list rather than a bespoke query.
+  return (await journalsByRecency()).find((j) => j.slug === slug) ?? null;
+}
+
+export function listJournalEditions(journalId: string) {
+  return db
+    .select({
+      id: edition.id, slug: edition.slug,
+      volume: edition.volume, issue: edition.issue,
+      title: edition.title, summary: edition.summary,
+      publishedOn: edition.publishedOn,
+      articleCount: count(article.id),
+    })
+    .from(edition)
+    .leftJoin(article, eq(article.editionId, edition.id))
+    .where(eq(edition.journalId, journalId))
+    .groupBy(edition.id)
+    .orderBy(sql`${edition.publishedOn} desc nulls last`);
+}
+
+export async function getEdition(journalId: string, slug: string) {
+  const [row] = await db
+    .select()
+    .from(edition)
+    .where(and(eq(edition.journalId, journalId), eq(edition.slug, slug)));
+  return row ?? null;
+}
+
+// Articles of an edition, recent-first, each with ordered authors (id/slug/name).
+export async function listEditionArticles(editionId: string) {
+  const arts = await db
+    .select({
+      id: article.id, slug: article.slug, title: article.title,
+      abstract: article.abstract, publishedOn: article.publishedOn,
+    })
+    .from(article)
+    .where(eq(article.editionId, editionId))
+    .orderBy(sql`${article.publishedOn} desc nulls last`);
+
+  const aa = await db
+    .select({ articleId: articleAuthor.articleId, id: person.id, slug: person.slug, name: person.name })
+    .from(articleAuthor)
+    .innerJoin(person, eq(person.id, articleAuthor.personId))
+    .innerJoin(article, eq(article.id, articleAuthor.articleId))
+    .where(eq(article.editionId, editionId))
+    .orderBy(articleAuthor.ord);
+  const byArticle = new Map<string, { id: string; slug: string; name: string }[]>();
+  for (const r of aa) {
+    (byArticle.get(r.articleId) ?? byArticle.set(r.articleId, []).get(r.articleId)!)
+      .push({ id: r.id, slug: r.slug, name: r.name });
+  }
+
+  return arts.map((a) => ({ ...a, authors: byArticle.get(a.id) ?? [] }));
+}
+
+// Full article + its authors, edition, journal, and edition siblings.
+export async function getArticleBySlug(slug: string) {
+  const [a] = await db.select().from(article).where(eq(article.slug, slug));
+  if (!a) return null;
+
+  const authors = await db
+    .select({ id: person.id, slug: person.slug, name: person.name })
+    .from(articleAuthor)
+    .innerJoin(person, eq(person.id, articleAuthor.personId))
+    .where(eq(articleAuthor.articleId, a.id))
+    .orderBy(articleAuthor.ord);
+
+  const [ed] = await db.select().from(edition).where(eq(edition.id, a.editionId));
+  const [j] = ed ? await db.select().from(journal).where(eq(journal.id, ed.journalId)) : [];
+
+  const siblings = await db
+    .select({ id: article.id, slug: article.slug, title: article.title })
+    .from(article)
+    .where(and(eq(article.editionId, a.editionId), sql`${article.id} <> ${a.id}`));
+
+  return {
+    article: { ...a, body: (a.body as ArticleBlock[]) ?? [], keywords: a.keywords ?? [] },
+    authors,
+    edition: ed ?? null,
+    journal: j ?? null,
+    siblings,
+  };
+}
+
+// Books, recent-first, with author names.
+export async function booksByRecency(): Promise<BookCard[]> {
+  const bks = await db.select().from(book).orderBy(sql`${book.publishedOn} desc nulls last`);
+  const ba = await db
+    .select({ bookId: bookAuthor.bookId, name: person.name })
+    .from(bookAuthor)
+    .innerJoin(person, eq(person.id, bookAuthor.personId))
+    .orderBy(bookAuthor.ord);
+  const byBook = new Map<string, string[]>();
+  for (const r of ba) (byBook.get(r.bookId) ?? byBook.set(r.bookId, []).get(r.bookId)!).push(r.name);
+  return bks.map((b) => ({
+    id: b.id, slug: b.slug, title: b.title, topic: b.topic, synopsis: b.synopsis,
+    tint: b.tint, isbn: b.isbn, publishedOn: b.publishedOn, accessNote: b.accessNote,
+    authors: byBook.get(b.id) ?? [],
+  }));
+}
+
+export async function getBookBySlug(slug: string) {
+  const [b] = await db.select().from(book).where(eq(book.slug, slug));
+  if (!b) return null;
+  const authors = await db
+    .select({ id: person.id, slug: person.slug, name: person.name })
+    .from(bookAuthor)
+    .innerJoin(person, eq(person.id, bookAuthor.personId))
+    .where(eq(bookAuthor.bookId, b.id))
+    .orderBy(bookAuthor.ord);
+  return { book: b, authors };
+}
+
+export function getArticlesByAuthor(personId: string) {
+  return db
+    .select({
+      id: article.id, slug: article.slug, title: article.title,
+      publishedOn: article.publishedOn, journalTitle: journal.title,
+    })
+    .from(articleAuthor)
+    .innerJoin(article, eq(article.id, articleAuthor.articleId))
+    .innerJoin(edition, eq(edition.id, article.editionId))
+    .innerJoin(journal, eq(journal.id, edition.journalId))
+    .where(eq(articleAuthor.personId, personId))
+    .orderBy(sql`${article.publishedOn} desc nulls last`);
+}
+
+export function getBooksByAuthor(personId: string) {
+  return db
+    .select({
+      id: book.id, slug: book.slug, title: book.title,
+      topic: book.topic, publishedOn: book.publishedOn,
+    })
+    .from(bookAuthor)
+    .innerJoin(book, eq(book.id, bookAuthor.bookId))
+    .where(eq(bookAuthor.personId, personId))
+    .orderBy(sql`${book.publishedOn} desc nulls last`);
+}
+
+// Journals this person edits — via their linked user + journal_editor scope.
+// ponytail: seeded mock people have no linked user, so this is empty for them;
+// real editors (person.user_id set + journal_editor row) resolve correctly.
+export async function getEditedJournals(personId: string): Promise<JournalRef[]> {
+  const [p] = await db.select({ userId: person.userId }).from(person).where(eq(person.id, personId));
+  if (!p?.userId) return [];
+  return db
+    .select({ id: journal.id, slug: journal.slug, title: journal.title })
+    .from(journalEditor)
+    .innerJoin(journal, eq(journal.id, journalEditor.journalId))
+    .where(eq(journalEditor.userId, p.userId))
+    .orderBy(journal.title);
+}
+
+export type DirectoryContributor = {
+  slug: string; name: string; affiliation: string; kind: string[]; work: number;
+};
+
+// Every catalogue person + their published-work count, for the authors directory.
+export async function listContributorsForDirectory(): Promise<DirectoryContributor[]> {
+  const ppl = await db
+    .select({ id: person.id, slug: person.slug, name: person.name, affiliation: person.affiliation, kind: person.kind })
+    .from(person)
+    .orderBy(person.name);
+  const ac = await db.select({ pid: articleAuthor.personId, n: count() }).from(articleAuthor).groupBy(articleAuthor.personId);
+  const bc = await db.select({ pid: bookAuthor.personId, n: count() }).from(bookAuthor).groupBy(bookAuthor.personId);
+  const work = new Map<string, number>();
+  for (const r of [...ac, ...bc]) work.set(r.pid, (work.get(r.pid) ?? 0) + r.n);
+  return ppl.map((p) => ({
+    slug: p.slug, name: p.name, affiliation: p.affiliation ?? "",
+    kind: p.kind, work: work.get(p.id) ?? 0,
+  }));
+}
+
+// Static-param sources.
+export function allArticleSlugs() {
+  return db.select({ slug: article.slug }).from(article);
+}
+export function allEditionParams() {
+  return db
+    .select({ slug: journal.slug, edition: edition.slug })
+    .from(edition)
+    .innerJoin(journal, eq(journal.id, edition.journalId));
 }

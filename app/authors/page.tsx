@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { people, getArticlesByAuthor, getBooksByAuthor } from "@/lib/data";
-import { listPublicContributors } from "@/lib/db/queries";
+import { listContributorsForDirectory } from "@/lib/db/queries";
 import { Container, PageHeader } from "@/app/components/ui";
 import { AuthorsDirectory, type DirEntry } from "./directory";
 
@@ -11,23 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AuthorsPage() {
-  const dbc = await listPublicContributors();
-  const entries: DirEntry[] = [
-    ...people.map((p) => ({
-      slug: p.slug,
-      name: p.name,
-      affiliation: p.affiliation,
-      kind: p.kind as string[],
-      work: getArticlesByAuthor(p.id).length + getBooksByAuthor(p.id).length,
-    })),
-    ...dbc.map((c) => ({
-      slug: c.slug,
-      name: c.name,
-      affiliation: c.affiliation ?? "",
-      kind: c.kind,
-      work: 0,
-    })),
-  ].sort((a, b) => a.name.localeCompare(b.name));
+  const entries: DirEntry[] = await listContributorsForDirectory();
 
   return (
     <>

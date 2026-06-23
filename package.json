@@ -6,21 +6,38 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --import tsx --test \"lib/**/*.test.ts\"",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node --env-file=.env.local --import tsx scripts/migrate.ts",
+    "db:seed": "node --env-file=.env.local --import tsx scripts/seed.ts",
+    "db:seed:dev": "node --env-file=.env.local --import tsx scripts/seed-dev.ts",
+    "db:reset": "npm run db:migrate && npm run db:seed"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.658.1",
+    "@aws-sdk/s3-request-presigner": "^3.658.1",
+    "@neondatabase/serverless": "^0.10.4",
+    "better-auth": "^1.2.7",
+    "drizzle-orm": "^0.45.2",
+    "gsap": "^3.15.0",
     "next": "16.2.9",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "resend": "^4.0.1",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@react-email/components": "^0.0.32",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.4",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",
+    "tsx": "^4.19.2",
     "typescript": "^5"
   }
 }
