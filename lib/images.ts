@@ -6,7 +6,7 @@
 const COVER_VERSION = "2";
 
 export function coverImage(seed: string, width = 480, height = 720): string {
-  return `/covers/${seed}.png?v=${COVER_VERSION}`;
+  return `/covers/${seed}.webp?v=${COVER_VERSION}`;
 }
 
 export function portraitImage(seed: string, size = 320): string {
