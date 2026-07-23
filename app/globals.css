@@ -1,26 +1,202 @@
 @import "tailwindcss";
 
+/*
+ * Porcelain Publishing design tokens — mirrors .pipeline/design-tokens.json v1.
+ * Names read semantically (ink/porcelain/slate/sage/hairline) rather than the
+ * brief's raw role names (text/background/secondary/accent/neutral) so utility
+ * classes stay legible; the hex values are identical to the token source.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-ink: #1a202c; /* color.text */
+  --color-porcelain: #fefdfb; /* color.background — the ground on every page */
+  --color-porcelain-soft: #f9f7f4; /* color.primary — surfaces, panels */
+  --color-slate: #4a5568; /* color.secondary — UI copy, footer fill */
+  --color-slate-hover: #3d4759;
+  --color-sage: #8b9a8e; /* color.accent — rationed, never body text */
+  --color-sage-hover: #7c8c80;
+  --color-sage-ink: #1a202c; /* color.textOnAccent */
+  --color-hairline: #e2ddd8; /* color.neutral — borders/dividers only */
+  --color-success: #2f6b4a;
+  --color-warning: #8a5a00;
+  --color-error: #a23b3b;
+  --color-info: #35526b;
+
+  --font-heading: var(--font-playfair), Georgia, serif;
+  --font-body: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-fira-code), ui-monospace, "SFMono-Regular", monospace;
+
+  /* typography.scale — design-tokens.json */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-3xl: 2.75rem;
+  --text-4xl: 3.5rem;
+  --text-5xl: 4.25rem;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ink: var(--color-ink);
+  --color-porcelain: var(--color-porcelain);
+  --color-porcelain-soft: var(--color-porcelain-soft);
+  --color-slate: var(--color-slate);
+  --color-slate-hover: var(--color-slate-hover);
+  --color-sage: var(--color-sage);
+  --color-sage-hover: var(--color-sage-hover);
+  --color-sage-ink: var(--color-sage-ink);
+  --color-hairline: var(--color-hairline);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
+  --color-info: var(--color-info);
+
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  --text-xs: var(--text-xs);
+  --text-sm: var(--text-sm);
+  --text-base: var(--text-base);
+  --text-lg: var(--text-lg);
+  --text-xl: var(--text-xl);
+  --text-2xl: var(--text-2xl);
+  --text-3xl: var(--text-3xl);
+  --text-4xl: var(--text-4xl);
+  --text-5xl: var(--text-5xl);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-porcelain);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  letter-spacing: -0.006em;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+.font-mono-bib {
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+/* Kiln-Stamp corner ring — shared SVG stroke draw-in used by KilnCard and any
+   circular-portrait variant. Drawn with stroke-dasharray/-dashoffset so the
+   "ring drawing in from the bottom-right corner" reads as one continuous
+   gesture rather than a fade. */
+.kiln-ring {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  transition: stroke-dashoffset 400ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.kiln-hover:hover .kiln-ring,
+.kiln-hover:focus-within .kiln-ring {
+  stroke-dashoffset: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kiln-ring {
+    stroke-dashoffset: 400; /* permanently ~60% drawn per the reduced-motion spec */
+    transition: none;
+  }
+}
+
+.kiln-underline {
+  background-image: linear-gradient(var(--color-sage), var(--color-sage));
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: 0% 1px;
+  transition: background-size 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.kiln-hover:hover .kiln-underline,
+.kiln-hover:focus-within .kiln-underline {
+  background-size: 100% 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kiln-underline {
+    background-size: 100% 1px;
+    transition: none;
+  }
+}
+
+.kiln-cover {
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.kiln-hover:hover .kiln-cover,
+.kiln-hover:focus-within .kiln-cover {
+  transform: scale(1.02);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kiln-cover {
+    transition: none;
+  }
+  .kiln-hover:hover .kiln-cover,
+  .kiln-hover:focus-within .kiln-cover {
+    transform: none;
+  }
+}
+
+/* Batch-reveal items (useBatchReveal.ts / data-reveal-item): hidden and
+   shifted left by default in CSS -- not via a JS gsap.set() call -- so the
+   very first browser paint (before hydration/JS has run at all) never shows
+   the settled state and then visibly snaps back to hidden. useBatchReveal
+   animates from this CSS state with gsap.to(), reading it as the tween's
+   starting point. The noscript override below is the safety net for no-JS
+   visitors, and reduced-motion is handled here too so OS-level
+   reduced-motion users never see the hidden state, JS or not. */
+[data-reveal-item] {
+  opacity: 0;
+  transform: translateX(-24px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal-item] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* z-index scale — semantic, never arbitrary */
+:root {
+  --z-dropdown: 20;
+  --z-sticky: 30;
+  --z-overlay: 40;
+  --z-modal: 50;
+  --z-toast: 60;
 }
