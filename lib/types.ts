@@ -43,6 +43,7 @@ export interface Journal {
   topics: string[];
   editorIds: string[];
   issues: Issue[];
+  popularity: number;
 }
 
 export interface Chapter {
@@ -66,4 +67,5 @@ export interface Book {
   coverSeed: string;
   subjectTags: string[];
   chapters: Chapter[];
+  popularity: number;
 }

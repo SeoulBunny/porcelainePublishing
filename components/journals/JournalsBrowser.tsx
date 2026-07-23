@@ -15,12 +15,13 @@ import { Pagination } from "@/components/shared/Pagination";
 import { journals } from "@/lib/data/journals";
 import { getWriter } from "@/lib/data/writers";
 import { coverImage, portraitImage } from "@/lib/images";
+import { useResponsivePageSize } from "@/lib/hooks/useResponsivePageSize";
 import { useBatchReveal } from "@/lib/motion/useBatchReveal";
 
-// 4/page (not 10) — the catalog is a curated handful of journals, not a
-// database dump; at 10/page the pagination control never had a second page
-// to go to and rendered nothing (Pagination returns null when pageCount<=1).
-const PAGE_SIZE = 4;
+const SORT_OPTIONS = [
+  { value: "date", label: "Publish date" },
+  { value: "popularity", label: "Popularity" },
+];
 
 const ALL_TOPICS = Array.from(new Set(journals.flatMap((j) => j.topics))).sort();
 const ALL_YEARS = Array.from(
@@ -32,13 +33,15 @@ export function JournalsBrowser() {
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [topic, setTopic] = useState("");
   const [year, setYear] = useState("");
+  const [sort, setSort] = useState("date");
   const [page, setPage] = useState(1);
   const gridRef = useRef<HTMLDivElement>(null);
   useBatchReveal(gridRef);
+  const pageSize = useResponsivePageSize();
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return journals.filter((j) => {
+    const result = journals.filter((j) => {
       if (q && !j.title.toLowerCase().includes(q) && !j.description.toLowerCase().includes(q)) {
         return false;
       }
@@ -46,11 +49,16 @@ export function JournalsBrowser() {
       if (year && j.issues[0]?.publishedAt.slice(0, 4) !== year) return false;
       return true;
     });
-  }, [query, topic, year]);
+    return result.sort((a, b) =>
+      sort === "popularity"
+        ? b.popularity - a.popularity
+        : (b.issues[0]?.publishedAt ?? "").localeCompare(a.issues[0]?.publishedAt ?? ""),
+    );
+  }, [query, topic, year, sort]);
 
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
   const currentPage = Math.min(page, pageCount);
-  const pageItems = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const pageItems = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   function handleFilterChange(fn: () => void) {
     fn();
@@ -73,6 +81,10 @@ export function JournalsBrowser() {
         dateOptions={ALL_YEARS.map((y) => ({ value: y, label: y }))}
         date={year}
         onDateChange={(v) => handleFilterChange(() => setYear(v))}
+        sortLabel="Sort by"
+        sortOptions={SORT_OPTIONS}
+        sort={sort}
+        onSortChange={(v) => handleFilterChange(() => setSort(v))}
         onClear={() => handleFilterChange(() => {
           setQuery("");
           setTopic("");
@@ -89,7 +101,7 @@ export function JournalsBrowser() {
           ) : (
             <div
               ref={gridRef}
-              className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+              className="grid grid-cols-2 gap-x-6 gap-y-10 sm:grid-cols-3 lg:grid-cols-4"
             >
               {pageItems.map((journal) => {
                 const editor = getWriter(journal.editorIds[0] ?? "");

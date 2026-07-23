@@ -24,6 +24,10 @@ export interface FilterBarProps {
   dateOptions: { value: string; label: string }[];
   date: string;
   onDateChange: (value: string) => void;
+  sortLabel: string;
+  sortOptions: { value: string; label: string }[];
+  sort: string;
+  onSortChange: (value: string) => void;
   onClear: () => void;
 }
 
@@ -40,12 +44,17 @@ export function FilterBar({
   dateOptions,
   date,
   onDateChange,
+  sortLabel,
+  sortOptions,
+  sort,
+  onSortChange,
   onClear,
 }: FilterBarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const searchId = useId();
   const topicId = useId();
   const dateId = useId();
+  const sortId = useId();
 
   const activeFilters: { key: string; label: string; onRemove: () => void }[] = [];
   if (topic) {
@@ -113,6 +122,24 @@ export function FilterBar({
           {dateOptions.map((d) => (
             <option key={d.value} value={d.value}>
               {d.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="sm:w-44">
+        <label htmlFor={sortId} className="mb-1.5 block text-sm font-medium text-ink">
+          {sortLabel}
+        </label>
+        <select
+          id={sortId}
+          value={sort}
+          onChange={(e) => onSortChange(e.target.value)}
+          className="w-full rounded-lg border border-hairline bg-porcelain px-3 py-2 text-sm text-ink focus:border-sage focus:outline-none focus:ring-2 focus:ring-sage/40"
+        >
+          {sortOptions.map((s) => (
+            <option key={s.value} value={s.value}>
+              {s.label}
             </option>
           ))}
         </select>

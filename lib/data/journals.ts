@@ -12,6 +12,7 @@ export const journals: Journal[] = [
     coverSeed: "journal-quarterly-comparative-linguistics",
     topics: ["Syntax", "Language contact", "Sociolinguistics", "Fieldwork methods"],
     editorIds: ["hana-seo", "linh-pham"],
+    popularity: 4820,
     issues: [
       {
         volume: 12,
@@ -60,6 +61,7 @@ export const journals: Journal[] = [
     coverSeed: "journal-annals-of-ceramic-materials",
     topics: ["Glaze chemistry", "Kiln thermodynamics", "Archaeometry", "Firing technique"],
     editorIds: ["wei-zhang", "mireille-tanaka"],
+    popularity: 3190,
     issues: [
       {
         volume: 8,
@@ -99,6 +101,7 @@ export const journals: Journal[] = [
     coverSeed: "journal-journal-of-applied-cognitive-science",
     topics: ["Memory", "Cross-cultural cognition", "Decision-making", "Replication"],
     editorIds: ["priya-nandakumar"],
+    popularity: 6105,
     issues: [
       {
         volume: 5,
@@ -138,6 +141,7 @@ export const journals: Journal[] = [
     coverSeed: "journal-coastal-and-environmental-policy-review",
     topics: ["Coastal governance", "Climate adaptation", "Fisheries policy", "Regulation"],
     editorIds: ["daniel-okafor", "arjun-mehta"],
+    popularity: 2270,
     issues: [
       {
         volume: 9,
@@ -168,6 +172,7 @@ export const journals: Journal[] = [
     coverSeed: "journal-journal-of-regional-development-economics",
     topics: ["Trade corridors", "Informal labor", "Regional growth", "Data transparency"],
     editorIds: ["arjun-mehta"],
+    popularity: 1840,
     issues: [
       {
         volume: 14,
@@ -198,6 +203,7 @@ export const journals: Journal[] = [
     coverSeed: "journal-journal-of-education-and-social-mobility",
     topics: ["Higher-ed access", "Credential inflation", "Mobility outcomes"],
     editorIds: ["linh-pham", "soo-min-kang"],
+    popularity: 2955,
     issues: [
       {
         volume: 6,

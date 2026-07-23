@@ -15,6 +15,7 @@ export const books: Book[] = [
       "A material-culture history tracing celadon and blue-and-white porcelain trade routes from Goryeo kilns through Ming export networks to European court collections.",
     coverSeed: "book-kiln-and-empire",
     subjectTags: ["Material culture", "Trade history", "East Asian art"],
+    popularity: 5210,
     chapters: [
       { id: "c1", number: 1, title: "The Gangjin kilns and the celadon export boom", preview: "Excavation records from the Gangjin kiln complex reveal an export operation far larger than court demand alone could explain." },
       { id: "c2", number: 2, title: "Blue-and-white as diplomatic currency", preview: "Ming-era gift registers show porcelain functioning as a formal instrument of tributary diplomacy across three courts." },
@@ -37,6 +38,7 @@ export const books: Book[] = [
       "A comparative linguistic study of tonal drift and grammatical borrowing among coastal communities bridging the Korean peninsula and eastern China.",
     coverSeed: "book-tone-and-territory",
     subjectTags: ["Linguistics", "Language contact", "Fieldwork"],
+    popularity: 3005,
     chapters: [
       { id: "c1", number: 1, title: "Mapping the contact zone", preview: "Three centuries of fishing-fleet intermarriage produced a contact zone linguists have only recently begun to map systematically." },
       { id: "c2", number: 2, title: "Tone sandhi as a contact signature", preview: "Sandhi patterns diverge from both parent languages in ways that resist a simple substrate explanation." },
@@ -58,6 +60,7 @@ export const books: Book[] = [
       "An experimental psychology monograph arguing that narrative tradition, not chronological development, is the primary driver of autobiographical memory structure.",
     coverSeed: "book-memory-across-cultures",
     subjectTags: ["Cognitive science", "Cross-cultural psychology"],
+    popularity: 7130,
     chapters: [
       { id: "c1", number: 1, title: "The developmental assumption and its limits", preview: "Standard developmental accounts of autobiographical memory struggle to explain the study's four-cohort comparison." },
       { id: "c2", number: 2, title: "Oral tradition households versus written-record households", preview: "Households organized around oral versus written record-keeping show measurably different memory density by age eight." },
@@ -78,6 +81,7 @@ export const books: Book[] = [
       "A comparative policy study of artisanal fishing rights and reef governance across West African and Southeast Asian coastal economies.",
     coverSeed: "book-tideline-governance",
     subjectTags: ["Environmental policy", "Development economics"],
+    popularity: 1980,
     chapters: [
       { id: "c1", number: 1, title: "Overlapping claims, underlapping law", preview: "Colonial-era maritime boundaries left overlapping claims that postcolonial law never fully resolved." },
       { id: "c2", number: 2, title: "The Ghana-Philippines comparison", preview: "Two coastlines, two legal traditions, and one shared arbitration proposal this book develops in full." },
@@ -99,6 +103,7 @@ export const books: Book[] = [
       "A fifteen-year cohort study of credential inflation and first-generation access across Vietnamese and South Korean university systems.",
     coverSeed: "book-the-credential-economy",
     subjectTags: ["Sociology of education", "Social mobility"],
+    popularity: 2640,
     chapters: [
       { id: "c1", number: 1, title: "Fifteen years of rising entry requirements", preview: "Entry requirements rose steadily across both systems even as access programs expanded in parallel." },
       { id: "c2", number: 2, title: "First-generation entrants and the widening gap", preview: "First-generation entrants closed the enrollment gap but not the credential-value gap the book documents." },
@@ -119,6 +124,7 @@ export const books: Book[] = [
       "A methodological history of twentieth-century Korean diplomatic archives, examining how record-keeping practice itself shaped later historical interpretation.",
     coverSeed: "book-archival-korea",
     subjectTags: ["History", "Archival methodology"],
+    popularity: 4055,
     chapters: [
       { id: "c1", number: 1, title: "The archive as a diplomatic instrument", preview: "Record-keeping practice was never neutral; this chapter traces how filing decisions shaped later diplomatic interpretation." },
       { id: "c2", number: 2, title: "Postwar reconstruction of lost records", preview: "Reconstructed records after wartime losses introduce gaps historians have long underestimated." },
